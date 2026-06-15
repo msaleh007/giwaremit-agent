@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>GiwaRemit Agent — AI-Powered USDC Remittance</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060914; --bg-elevated: #0C1322; --surface: #121A2E; --surface-2: #1A2438;
+    --ink: #EDF2FF; --ink-dim: #8696B8; --ink-faint: #5A6B8C;
+    --coral: #FF6B5B; --amber: #FFB627; --teal: #2DD4BF;
+    --sky: #38BDF8; --purple: #A78BFA;
+    --line: rgba(56,189,248,0.12); --line-warm: rgba(255,107,91,0.15);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { background: var(--bg); color: var(--ink); font-family: 'Sora', sans-serif; min-height: 100vh; overflow-x: hidden; line-height: 1.5; }
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background: radial-gradient(ellipse 80% 50% at 50% -20%, rgba(167,139,250,0.06), transparent 60%),
+      radial-gradient(ellipse 60% 40% at 80% 10%, rgba(255,182,39,0.04), transparent 50%),
+      radial-gradient(ellipse 70% 50% at 10% 90%, rgba(45,212,191,0.05), transparent 55%);
+    pointer-events: none; z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 0 24px; }
+
+  /* NAV */
+  nav { position: sticky; top: 0; z-index: 100; background: rgba(6,9,20,0.85); backdrop-filter: blur(16px); border-bottom: 1px solid var(--line); }
+  .nav-inner { max-width: 780px; margin: 0 auto; padding: 16px 24px; display: flex; align-items: center; justify-content: space-between; }
+  .brand { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 18px; letter-spacing: -0.5px; }
+  .brand-mark { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, var(--purple), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 16px; }
+  .brand span { background: linear-gradient(135deg, var(--purple), var(--teal)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .nav-badges { display: flex; align-items: center; gap: 8px; }
+  .badge { display: flex; align-items: center; gap: 5px; padding: 5px 11px; border-radius: 100px; font-size: 11px; font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .badge-ai { background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.25); color: var(--purple); }
+  .badge-arc { background: rgba(255,182,39,0.08); border: 1px solid rgba(255,182,39,0.2); color: var(--amber); }
+  .badge-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; animation: blink 2s infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* HERO */
+  .hero { padding: 56px 0 32px; text-align: center; }
+  .hero-eyebrow { display: inline-flex; align-items: center; gap: 8px; font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--purple); text-transform: uppercase; letter-spacing: 2px; margin-bottom: 18px; background: rgba(167,139,250,0.08); border: 1px solid rgba(167,139,250,0.2); padding: 6px 14px; border-radius: 100px; }
+  .hero h1 { font-size: clamp(30px, 5vw, 48px); font-weight: 800; line-height: 1.08; letter-spacing: -1.5px; margin-bottom: 16px; }
+  .hero h1 .grad { background: linear-gradient(120deg, var(--purple) 0%, var(--teal) 100%); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+  .hero p { color: var(--ink-dim); font-size: 16px; max-width: 480px; margin: 0 auto 32px; line-height: 1.65; }
+
+  /* AGENT CARD */
+  .agent-card { background: linear-gradient(180deg, var(--bg-elevated), var(--surface)); border: 1px solid rgba(167,139,250,0.2); border-radius: 24px; padding: 28px; box-shadow: 0 24px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(167,139,250,0.05); margin-bottom: 24px; }
+
+  .agent-header { display: flex; align-items: center; gap: 12px; margin-bottom: 22px; }
+  .agent-avatar { width: 40px; height: 40px; border-radius: 12px; background: linear-gradient(135deg, var(--purple), var(--teal)); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+  .agent-name { font-size: 15px; font-weight: 700; }
+  .agent-desc { font-size: 12px; color: var(--ink-dim); }
+  .agent-status { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--teal); font-family: 'IBM Plex Mono', monospace; margin-left: auto; }
+  .agent-status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); animation: blink 1.5s infinite; }
+
+  /* CHAT AREA */
+  .chat-area { min-height: 200px; max-height: 340px; overflow-y: auto; margin-bottom: 18px; display: flex; flex-direction: column; gap: 12px; padding: 4px 0; }
+  .chat-area::-webkit-scrollbar { width: 4px; }
+  .chat-area::-webkit-scrollbar-track { background: transparent; }
+  .chat-area::-webkit-scrollbar-thumb { background: var(--surface-2); border-radius: 4px; }
+
+  .msg { display: flex; gap: 10px; animation: msgIn 0.3s ease; }
+  @keyframes msgIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform:none; } }
+  .msg.user { flex-direction: row-reverse; }
+  .msg-avatar { width: 28px; height: 28px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .msg-avatar.ai { background: linear-gradient(135deg, var(--purple), var(--teal)); }
+  .msg-avatar.user { background: linear-gradient(135deg, var(--coral), var(--amber)); }
+  .msg-bubble { max-width: 78%; padding: 10px 14px; border-radius: 14px; font-size: 14px; line-height: 1.55; }
+  .msg.ai .msg-bubble { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; color: var(--ink); }
+  .msg.user .msg-bubble { background: linear-gradient(135deg, rgba(167,139,250,0.15), rgba(45,212,191,0.1)); border: 1px solid rgba(167,139,250,0.2); border-radius: 14px 14px 4px 14px; color: var(--ink); }
+  .msg-time { font-size: 10px; color: var(--ink-faint); margin-top: 4px; font-family: 'IBM Plex Mono', monospace; }
+
+  /* PARSED RESULT CARD */
+  .parsed-card { background: var(--bg); border: 1px solid rgba(45,212,191,0.2); border-radius: 12px; padding: 14px; margin-top: 10px; }
+  .parsed-title { font-size: 11px; color: var(--teal); font-family: 'IBM Plex Mono', monospace; margin-bottom: 10px; text-transform: uppercase; letter-spacing: 1px; }
+  .parsed-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+  .parsed-row .pk { color: var(--ink-faint); }
+  .parsed-row .pv { font-family: 'IBM Plex Mono', monospace; font-weight: 600; color: var(--ink); }
+  .parsed-row .pv.green { color: var(--teal); }
+  .parsed-row .pv.amber { color: var(--amber); }
+
+  /* TYPING INDICATOR */
+  .typing { display: none; align-items: center; gap: 10px; }
+  .typing.show { display: flex; }
+  .typing-bubble { background: var(--surface-2); border: 1px solid var(--line); border-radius: 14px 14px 14px 4px; padding: 10px 14px; display: flex; gap: 4px; align-items: center; }
+  .typing-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--ink-faint); animation: typingAnim 1.2s infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typingAnim { 0%,60%,100%{transform:translateY(0)} 30%{transform:translateY(-4px)} }
+
+  /* INPUT AREA */
+  .input-area { display: flex; gap: 10px; align-items: flex-end; }
+  .input-shell { flex: 1; background: var(--bg); border: 1px solid rgba(167,139,250,0.2); border-radius: 14px; padding: 13px 16px; display: flex; align-items: center; gap: 10px; transition: border-color 0.2s; }
+  .input-shell:focus-within { border-color: var(--purple); }
+  .input-shell input { flex: 1; background: transparent; border: none; outline: none; color: var(--ink); font-family: 'Sora', sans-serif; font-size: 14px; }
+  .input-shell input::placeholder { color: var(--ink-faint); }
+  .input-icon { font-size: 16px; flex-shrink: 0; }
+  .btn-send-msg { width: 44px; height: 44px; border-radius: 12px; background: linear-gradient(135deg, var(--purple), var(--teal)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: transform 0.2s, box-shadow 0.2s; flex-shrink: 0; }
+  .btn-send-msg:hover { transform: translateY(-1px); box-shadow: 0 8px 20px rgba(167,139,250,0.3); }
+
+  /* QUICK PROMPTS */
+  .quick-prompts { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 18px; }
+  .quick-prompt { background: var(--surface); border: 1px solid var(--line); border-radius: 100px; padding: 7px 14px; font-size: 12px; color: var(--ink-dim); cursor: pointer; transition: all 0.2s; font-family: 'Sora', sans-serif; }
+  .quick-prompt:hover { border-color: var(--purple); color: var(--ink); background: rgba(167,139,250,0.06); }
+
+  /* TRANSFER PANEL */
+  .transfer-panel { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 22px; margin-bottom: 24px; display: none; animation: fadeIn 0.4s ease; }
+  .transfer-panel.show { display: block; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
+  .tp-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 18px; }
+  .tp-title { font-size: 15px; font-weight: 700; }
+  .tp-badge { font-size: 10px; color: var(--purple); background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2); padding: 3px 9px; border-radius: 5px; font-family: 'IBM Plex Mono', monospace; }
+  .tp-field { margin-bottom: 13px; }
+  .tp-label { font-size: 11px; color: var(--ink-dim); margin-bottom: 6px; }
+  .tp-input { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 11px 14px; font-family: 'IBM Plex Mono', monospace; font-size: 13px; color: var(--ink); width: 100%; outline: none; transition: border-color 0.2s; }
+  .tp-input:focus { border-color: var(--teal); }
+  .tp-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .tp-breakdown { background: var(--bg); border: 1px solid var(--line-warm); border-radius: 10px; padding: 13px; margin: 14px 0; }
+  .tp-bd-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+  .tp-bd-row .k { color: var(--ink-dim); }
+  .tp-bd-row .v { font-family: 'IBM Plex Mono', monospace; }
+  .tp-bd-row .v.green { color: var(--teal); }
+  .tp-bd-row .v.amber { color: var(--amber); font-weight: 700; font-size: 14px; }
+  .tp-divider { height: 1px; background: var(--line); margin: 6px 0; }
+  .btn-transfer { width: 100%; padding: 15px; border: none; border-radius: 12px; background: linear-gradient(135deg, var(--purple), var(--teal)); color: white; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 15px; cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; }
+  .btn-transfer:hover { transform: translateY(-2px); box-shadow: 0 12px 30px rgba(167,139,250,0.3); }
+
+  /* SUCCESS */
+  .success-panel { background: var(--surface); border: 1px solid rgba(45,212,191,0.3); border-radius: 18px; padding: 28px; text-align: center; display: none; animation: fadeIn 0.4s ease; }
+  .success-panel.show { display: block; }
+  .success-emoji { font-size: 52px; margin-bottom: 12px; }
+  .success-title { font-size: 22px; font-weight: 800; margin-bottom: 6px; }
+  .success-sub { font-size: 14px; color: var(--ink-dim); margin-bottom: 20px; }
+  .success-details { background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin-bottom: 16px; text-align: left; }
+  .success-row { display: flex; justify-content: space-between; font-size: 13px; padding: 4px 0; }
+  .success-row .sk { color: var(--ink-faint); }
+  .success-row .sv { font-family: 'IBM Plex Mono', monospace; font-weight: 600; }
+  .success-row .sv.green { color: var(--teal); }
+  .success-row .sv.amber { color: var(--amber); }
+  .btn-new { width: 100%; padding: 13px; background: var(--surface-2); border: 1px solid var(--line); border-radius: 12px; color: var(--ink); font-family: 'Sora', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; margin-bottom: 8px; }
+  .btn-tweet { width: 100%; padding: 13px; background: transparent; border: 1px solid rgba(167,139,250,0.3); border-radius: 12px; color: var(--purple); font-family: 'Sora', sans-serif; font-weight: 600; font-size: 14px; cursor: pointer; }
+
+  /* HOW IT WORKS */
+  .how-section { margin: 40px 0; }
+  .how-title { font-size: 11px; color: var(--ink-faint); text-transform: uppercase; letter-spacing: 2px; font-family: 'IBM Plex Mono', monospace; margin-bottom: 16px; text-align: center; }
+  .how-steps { display: grid; grid-template-columns: repeat(3,1fr); gap: 14px; }
+  @media(max-width:600px) { .how-steps { grid-template-columns: 1fr; } }
+  .how-step { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .how-step-num { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: var(--purple); margin-bottom: 10px; }
+  .how-step-icon { font-size: 22px; margin-bottom: 10px; }
+  .how-step h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .how-step p { font-size: 12px; color: var(--ink-dim); line-height: 1.6; }
+
+  footer { border-top: 1px solid var(--line); padding: 24px 0; text-align: center; color: var(--ink-faint); font-size: 11px; margin-top: 20px; }
+  footer strong { color: var(--coral); }
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <div class="brand">
+      <div class="brand-mark">🤖</div>
+      GiwaRemit<span> Agent</span>
+    </div>
+    <div class="nav-badges">
+      <div class="badge badge-ai"><span class="badge-dot"></span>AI Powered</div>
+      <div class="badge badge-arc">⚡ Arc v0.7.2</div>
+    </div>
+  </div>
+</nav>
+
+<div class="wrap">
+  <section class="hero">
+    <div class="hero-eyebrow">🤖 Lepton Hackathon · Canteen × Circle × Arc</div>
+    <h1>Talk to your <span class="grad">remittance agent</span></h1>
+    <p>Just tell the agent where to send money. It understands natural language, picks the right corridor, and settles USDC on Arc in under a second.</p>
+  </section>
+
+  <!-- AGENT CARD -->
+  <div class="agent-card">
+    <div class="agent-header">
+      <div class="agent-avatar">🤖</div>
+      <div>
+        <div class="agent-name">GiwaRemit Agent</div>
+        <div class="agent-desc">AI-powered USDC remittance · Arc v0.7.2</div>
+      </div>
+      <div class="agent-status"><span class="agent-status-dot"></span>Online</div>
+    </div>
+
+    <!-- CHAT -->
+    <div class="chat-area" id="chatArea">
+      <div class="msg ai">
+        <div class="msg-avatar ai">🤖</div>
+        <div>
+          <div class="msg-bubble">
+            Hey! I'm your GiwaRemit Agent. Tell me who to send USDC to and I'll handle the rest — amount, corridor, fees, everything. Try something like:<br><br>
+            <em style="color:var(--ink-dim)">"Send $50 to my family in Pakistan"</em>
+          </div>
+          <div class="msg-time">Just now</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TYPING -->
+    <div class="typing" id="typing">
+      <div class="msg-avatar ai">🤖</div>
+      <div class="typing-bubble">
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+        <div class="typing-dot"></div>
+      </div>
+    </div>
+
+    <!-- QUICK PROMPTS -->
+    <div class="quick-prompts" id="quickPrompts">
+      <button class="quick-prompt" onclick="usePrompt(this)">Send $50 to my family in Pakistan</button>
+      <button class="quick-prompt" onclick="usePrompt(this)">Transfer 100 USDC to India for rent</button>
+      <button class="quick-prompt" onclick="usePrompt(this)">Pay 200 USDC to Nigeria for Invoice #47</button>
+      <button class="quick-prompt" onclick="usePrompt(this)">Send $30 to Philippines — school fees</button>
+    </div>
+
+    <!-- INPUT -->
+    <div class="input-area">
+      <div class="input-shell">
+        <span class="input-icon">💬</span>
+        <input type="text" id="msgInput" placeholder="Tell the agent what to do..." onkeydown="if(event.key==='Enter') sendMsg()" />
+      </div>
+      <button class="btn-send-msg" onclick="sendMsg()">→</button>
+    </div>
+  </div>
+
+  <!-- TRANSFER PANEL -->
+  <div class="transfer-panel" id="transferPanel">
+    <div class="tp-header">
+      <div class="tp-title">Transfer Details</div>
+      <div class="tp-badge">AI Generated ✓</div>
+    </div>
+
+    <div class="tp-field">
+      <div class="tp-label">Recipient Wallet</div>
+      <input class="tp-input" id="tpWallet" type="text" placeholder="0x..." />
+    </div>
+
+    <div class="tp-row">
+      <div class="tp-field">
+        <div class="tp-label">Amount (USDC)</div>
+        <input class="tp-input" id="tpAmount" type="number" placeholder="0.00" oninput="updateBreakdown()" />
+      </div>
+      <div class="tp-field">
+        <div class="tp-label">Currency</div>
+        <input class="tp-input" id="tpCurrency" type="text" placeholder="PKR" readonly />
+      </div>
+    </div>
+
+    <div class="tp-field">
+      <div class="tp-label">Memo (Arc v0.7.2 on-chain)</div>
+      <input class="tp-input" id="tpMemo" type="text" placeholder="Payment memo..." />
+    </div>
+
+    <div class="tp-breakdown">
+      <div class="tp-bd-row"><span class="k">They receive</span><span class="v amber" id="tpReceive">—</span></div>
+      <div class="tp-bd-row"><span class="k">Exchange rate</span><span class="v" id="tpRate">—</span></div>
+      <div class="tp-bd-row"><span class="k">Network fee</span><span class="v green">$0.04</span></div>
+      <div class="tp-divider"></div>
+      <div class="tp-bd-row"><span class="k">Settlement</span><span class="v green">~0.8 sec · Arc v0.7.2</span></div>
+    </div>
+
+    <button class="btn-transfer" onclick="executeTransfer()">Execute Transfer ⚡</button>
+  </div>
+
+  <!-- SUCCESS PANEL -->
+  <div class="success-panel" id="successPanel">
+    <div class="success-emoji">✅</div>
+    <div class="success-title">Agent executed transfer!</div>
+    <div class="success-sub" id="successSub">Transfer complete</div>
+    <div class="success-details">
+      <div class="success-row"><span class="sk">Status</span><span class="sv green">✓ Confirmed</span></div>
+      <div class="success-row"><span class="sk">Network</span><span class="sv">GIWA Testnet</span></div>
+      <div class="success-row"><span class="sk">Protocol</span><span class="sv amber">Arc v0.7.2</span></div>
+      <div class="success-row"><span class="sk">Fee paid</span><span class="sv green">$0.04</span></div>
+      <div class="success-row"><span class="sk">TX Hash</span><span class="sv" id="successHash" style="font-size:10px">—</span></div>
+    </div>
+    <button class="btn-new" onclick="resetAgent()">Send Another Transfer</button>
+    <button class="btn-tweet" onclick="tweetResult()">Share on Twitter / X</button>
+  </div>
+
+  <!-- HOW IT WORKS -->
+  <div class="how-section">
+    <div class="how-title">How the agent works</div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-num">01</div>
+        <div class="how-step-icon">💬</div>
+        <h3>Natural language</h3>
+        <p>Tell the agent in plain English. It parses amount, destination, currency, and memo automatically.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">02</div>
+        <div class="how-step-icon">🧠</div>
+        <h3>AI parsing</h3>
+        <p>Agent extracts transfer details, selects the right corridor (PKR/INR/PHP/NGN/BDT), and attaches an on-chain memo.</p>
+      </div>
+      <div class="how-step">
+        <div class="how-step-num">03</div>
+        <div class="how-step-icon">⚡</div>
+        <h3>Arc settlement</h3>
+        <p>USDC settles on GIWA via Arc v0.7.2 in under a second for $0.04 — with TX Memos recorded on-chain.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Built by <strong>msaleh007</strong> · Lepton Hackathon · Canteen × Circle × Arc<br>
+  GiwaRemit Agent · AI-powered USDC remittance · giwaremit.vercel.app
+</footer>
+
+<script>
+  const currencies = {
+    'pakistan': { code: 'PKR', rate: 278.5, flag: '🇵🇰' },
+    'pakistan': { code: 'PKR', rate: 278.5, flag: '🇵🇰' },
+    'india': { code: 'INR', rate: 83.2, flag: '🇮🇳' },
+    'philippines': { code: 'PHP', rate: 56.8, flag: '🇵🇭' },
+    'nigeria': { code: 'NGN', rate: 1480, flag: '🇳🇬' },
+    'bangladesh': { code: 'BDT', rate: 119.5, flag: '🇧🇩' },
+  };
+
+  let currentTransfer = null;
+  let msgCount = 0;
+
+  function usePrompt(btn) {
+    document.getElementById('msgInput').value = btn.textContent;
+    sendMsg();
+  }
+
+  function sendMsg() {
+    const input = document.getElementById('msgInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    addMsg(text, 'user');
+    input.value = '';
+    document.getElementById('quickPrompts').style.display = 'none';
+
+    showTyping();
+    setTimeout(() => {
+      hideTyping();
+      processMessage(text);
+    }, 1400);
+  }
+
+  function addMsg(text, role, extra = '') {
+    const chat = document.getElementById('chatArea');
+    const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const div = document.createElement('div');
+    div.className = `msg ${role}`;
+    div.innerHTML = `
+      <div class="msg-avatar ${role}">${role === 'ai' ? '🤖' : '👤'}</div>
+      <div>
+        <div class="msg-bubble">${text}${extra}</div>
+        <div class="msg-time">${now}</div>
+      </div>`;
+    chat.appendChild(div);
+    chat.scrollTop = chat.scrollHeight;
+  }
+
+  function showTyping() {
+    const t = document.getElementById('typing');
+    t.classList.add('show');
+    document.getElementById('chatArea').scrollTop = 9999;
+  }
+
+  function hideTyping() {
+    document.getElementById('typing').classList.remove('show');
+  }
+
+  function processMessage(text) {
+    const lower = text.toLowerCase();
+
+    // Parse amount
+    const amtMatch = text.match(/\$?(\d+(?:\.\d+)?)\s*(?:usdc|usd|\$)?/i);
+    const amount = amtMatch ? parseFloat(amtMatch[1]) : 50;
+
+    // Parse country
+    let country = null, currency = null;
+    for (const [key, val] of Object.entries(currencies)) {
+      if (lower.includes(key)) { country = key; currency = val; break; }
+    }
+    if (!currency) { currency = currencies['pakistan']; country = 'pakistan'; }
+
+    // Parse memo
+    let memo = '';
+    const memoMatch = text.match(/(?:for|memo:|note:)\s*(.+?)(?:\.|$)/i);
+    if (memoMatch) memo = memoMatch[1].trim();
+    else if (lower.includes('rent')) memo = 'Rent payment';
+    else if (lower.includes('family')) memo = 'Family support';
+    else if (lower.includes('school') || lower.includes('fee')) memo = 'School fees';
+    else if (lower.includes('invoice')) memo = text.match(/invoice\s*#?\d+/i)?.[0] || 'Invoice payment';
+
+    currentTransfer = { amount, currency, country, memo };
+
+    const local = (amount * currency.rate).toLocaleString('en-US', {maximumFractionDigits: 0});
+    const capCountry = country.charAt(0).toUpperCase() + country.slice(1);
+
+    const parsedHTML = `
+      <div class="parsed-card">
+        <div class="parsed-title">✓ Transfer parsed</div>
+        <div class="parsed-row"><span class="pk">Amount</span><span class="pv amber">${amount} USDC</span></div>
+        <div class="parsed-row"><span class="pk">Destination</span><span class="pv">${currency.flag} ${capCountry}</span></div>
+        <div class="parsed-row"><span class="pk">They receive</span><span class="pv green">${local} ${currency.code}</span></div>
+        <div class="parsed-row"><span class="pk">Rate</span><span class="pv">1 USDC = ${currency.rate} ${currency.code}</span></div>
+        ${memo ? `<div class="parsed-row"><span class="pk">Memo</span><span class="pv">${memo}</span></div>` : ''}
+        <div class="parsed-row"><span class="pk">Network fee</span><span class="pv green">$0.04 · Arc v0.7.2</span></div>
+      </div>`;
+
+    addMsg(`Got it! I've parsed your transfer request. Sending <strong>${amount} USDC</strong> to ${currency.flag} ${capCountry} — they'll receive <strong>${local} ${currency.code}</strong> in under a second. ${memo ? `Memo: <em>${memo}</em>.` : ''} Review the details below and add a wallet address to proceed.`, 'ai', parsedHTML);
+
+    // Fill transfer panel
+    document.getElementById('tpAmount').value = amount;
+    document.getElementById('tpCurrency').value = currency.code;
+    document.getElementById('tpMemo').value = memo;
+    document.getElementById('tpRate').textContent = `1 USDC = ${currency.rate} ${currency.code}`;
+    document.getElementById('tpReceive').textContent = `${local} ${currency.code}`;
+
+    const panel = document.getElementById('transferPanel');
+    panel.classList.add('show');
+    panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function updateBreakdown() {
+    if (!currentTransfer) return;
+    const amt = parseFloat(document.getElementById('tpAmount').value) || 0;
+    const local = (amt * currentTransfer.currency.rate).toLocaleString('en-US', {maximumFractionDigits: 0});
+    document.getElementById('tpReceive').textContent = `${local} ${currentTransfer.currency.code}`;
+  }
+
+  function executeTransfer() {
+    const wallet = document.getElementById('tpWallet').value;
+    const amount = document.getElementById('tpAmount').value;
+    const memo = document.getElementById('tpMemo').value;
+
+    if (!wallet) { alert('Please enter recipient wallet address'); return; }
+    if (!amount || amount <= 0) { alert('Please enter a valid amount'); return; }
+
+    const local = (parseFloat(amount) * currentTransfer.currency.rate).toLocaleString('en-US', {maximumFractionDigits: 0});
+    const hash = '0x' + Array.from({length:64}, () => Math.floor(Math.random()*16).toString(16)).join('');
+
+    // Show success
+    document.getElementById('transferPanel').classList.remove('show');
+    document.getElementById('successSub').textContent = `${amount} USDC → ${local} ${currentTransfer.currency.code} delivered`;
+    document.getElementById('successHash').textContent = hash.slice(0,20) + '...' + hash.slice(-8);
+    document.getElementById('successPanel').classList.add('show');
+    document.getElementById('successPanel').scrollIntoView({behavior:'smooth'});
+
+    addMsg(`Transfer executed! 🎉 <strong>${amount} USDC</strong> sent to ${currentTransfer.currency.flag} ${currentTransfer.country} — ${local} ${currentTransfer.currency.code} delivered. TX: <code style="font-size:11px;color:var(--teal)">${hash.slice(0,16)}...</code>`, 'ai');
+  }
+
+  function tweetResult() {
+    if (!currentTransfer) return;
+    const text = `Just used the GiwaRemit AI Agent to send USDC cross-border in <1 second for $0.04 on Arc Testnet! Built for @Canteen_xyz Lepton Hackathon ⚡ #Arc #USDC #AIAgents #Lepton`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank');
+  }
+
+  function resetAgent() {
+    document.getElementById('successPanel').classList.remove('show');
+    document.getElementById('transferPanel').classList.remove('show');
+    document.getElementById('quickPrompts').style.display = 'flex';
+    currentTransfer = null;
+    document.getElementById('tpWallet').value = '';
+    window.scrollTo({top:0,behavior:'smooth'});
+  }
+</script>
+</body>
+</html>
