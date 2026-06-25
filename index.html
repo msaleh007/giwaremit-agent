@@ -522,10 +522,11 @@
     'function decimals() view returns (uint8)',
   ];
 
-  // Arc v0.7.2 Memo Contract ABI
+  // Arc v0.7.2 Official Memo Contract ABI (docs.arc.io)
   const MEMO_ABI = [
-    'function sendWithMemo(address token, address to, uint256 amount, string memo) returns (bool)',
-    'function transfer(address to, uint256 amount, string memo) payable',
+    'function memo(address target, bytes data, bytes32 memoId, bytes memoData)',
+    'event Memo(address indexed sender, address indexed target, bytes32 callDataHash, bytes32 indexed memoId, bytes memo, uint256 memoIndex)',
+    'event BeforeMemo(uint256 indexed memoIndex)',
   ];
 
   const currencies = {
@@ -748,18 +749,20 @@
       let usedMemoContract = false;
 
       try {
-        document.getElementById('txMsg').textContent = 'Approving USDC for Memo Contract...';
+        document.getElementById('txMsg').textContent = 'Encoding transfer + memo...';
 
-        // Approve memo contract to spend USDC
-        const usdc = new ethers.Contract(USDC_ADDRESS, USDC_ABI, signer);
-        const approveTx = await usdc.approve(MEMO_CONTRACT_ADDRESS, amountInUnits);
-        document.getElementById('txMsg').textContent = 'Waiting for approval confirmation...';
-        await approveTx.wait();
+        // Encode USDC transfer calldata
+        const usdcIface = new ethers.Interface(['function transfer(address to, uint256 amount) returns (bool)']);
+        const transferData = usdcIface.encodeFunctionData('transfer', [toAddr, amountInUnits]);
 
-        // Send via Memo Contract
+        // Generate memoId and memo bytes
+        const memoId = ethers.id('GiwaRemit-' + Date.now());
+        const memoBytes = ethers.toUtf8Bytes(memo);
+
+        // Send via official Arc v0.7.2 Memo Contract
         document.getElementById('txMsg').textContent = 'Confirm memo transfer in MetaMask...';
         const memoContract = new ethers.Contract(MEMO_CONTRACT_ADDRESS, MEMO_ABI, signer);
-        tx = await memoContract.sendWithMemo(USDC_ADDRESS, toAddr, amountInUnits, memo);
+        tx = await memoContract.memo(USDC_ADDRESS, transferData, memoId, memoBytes);
         usedMemoContract = true;
 
       } catch (memoErr) {
