@@ -317,6 +317,25 @@
   .btn-withdraw { background: linear-gradient(135deg, var(--coral), var(--amber)); border: none; color: #1A0F08; padding: 8px 18px; border-radius: 8px; font-family: 'Sora', sans-serif; font-weight: 700; font-size: 13px; cursor: pointer; }
   .btn-withdraw:disabled { opacity: 0.4; cursor: not-allowed; }
   @media (max-width: 600px) { .referral-stats { grid-template-columns: repeat(2,1fr); } }
+
+  /* ROADMAP */
+  .roadmap-card { background: linear-gradient(135deg, rgba(124,92,255,0.06), rgba(45,212,191,0.04)); border: 1px solid rgba(124,92,255,0.2); border-radius: 18px; padding: 28px; margin: 0 0 40px; }
+  .roadmap-head { margin-bottom: 24px; }
+  .roadmap-title { font-size: 20px; font-weight: 800; margin-bottom: 6px; }
+  .roadmap-sub { font-size: 13px; color: var(--ink-dim); }
+  .roadmap-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+  @media(max-width:760px) { .roadmap-grid { grid-template-columns: 1fr; } }
+  .roadmap-phase { background: var(--bg); border: 1px solid var(--line); border-radius: 14px; padding: 18px; }
+  .phase-label { font-size: 10px; font-family: 'IBM Plex Mono', monospace; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 10px; padding: 4px 10px; border-radius: 6px; display: inline-block; }
+  .phase-label.done { background: rgba(45,212,191,0.1); color: var(--teal); border: 1px solid rgba(45,212,191,0.2); }
+  .phase-label.soon { background: rgba(255,107,91,0.1); color: var(--coral); border: 1px solid rgba(255,107,91,0.2); }
+  .phase-label.future { background: rgba(124,92,255,0.1); color: #A78BFA; border: 1px solid rgba(124,92,255,0.2); }
+  .phase-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; }
+  .phase-item { display: flex; align-items: flex-start; gap: 8px; font-size: 12px; color: var(--ink-dim); padding: 5px 0; border-bottom: 1px solid var(--line); }
+  .phase-item:last-child { border-bottom: none; }
+  .phase-item-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+  .phase-item-text { line-height: 1.5; }
+  .phase-item-text strong { color: var(--ink); font-weight: 600; }
   footer { border-top: 1px solid var(--line); padding: 30px 0; text-align: center; color: var(--ink-faint); font-size: 12px; line-height: 2; }
   footer strong { color: var(--coral); }
   footer a { color: var(--teal); text-decoration: none; }
@@ -573,6 +592,52 @@
 </div>
 
 
+
+
+  <!-- ROADMAP -->
+  <div class="roadmap-card">
+    <div class="roadmap-head">
+      <div class="roadmap-title">🗺️ Product Roadmap</div>
+      <div class="roadmap-sub">GiwaRemit Agent — from testnet to agentic financial infrastructure</div>
+    </div>
+
+    <div class="roadmap-grid">
+
+      <!-- Phase 1 — Done -->
+      <div class="roadmap-phase">
+        <div class="phase-label done">✅ Phase 1 — Live</div>
+        <div class="phase-title">AI Remittance Agent</div>
+        <div class="phase-item"><span class="phase-item-icon">🤖</span><span class="phase-item-text"><strong>AI natural language parsing</strong> — plain English transfer commands</span></div>
+        <div class="phase-item"><span class="phase-item-icon">⚡</span><span class="phase-item-text"><strong>Arc v0.7.2 Memo Contract</strong> — on-chain payment references</span></div>
+        <div class="phase-item"><span class="phase-item-icon">💵</span><span class="phase-item-text"><strong>USDC + EURC support</strong> — multi-currency remittance</span></div>
+        <div class="phase-item"><span class="phase-item-icon">🌍</span><span class="phase-item-text"><strong>75+ world currencies</strong> — global corridor support</span></div>
+        <div class="phase-item"><span class="phase-item-icon">🏦</span><span class="phase-item-text"><strong>USDC Pool + 20% referral</strong> — community growth</span></div>
+      </div>
+
+      <!-- Phase 2 — Coming Soon -->
+      <div class="roadmap-phase">
+        <div class="phase-label soon">🔜 Phase 2 — Q3 2026</div>
+        <div class="phase-title">StableWork Marketplace</div>
+        <div class="phase-item"><span class="phase-item-icon">🏪</span><span class="phase-item-text"><strong>Freelance marketplace</strong> — hire & pay in USDC/EURC</span></div>
+        <div class="phase-item"><span class="phase-item-icon">🔐</span><span class="phase-item-text"><strong>Escrow contracts</strong> — funds released on completion</span></div>
+        <div class="phase-item"><span class="phase-item-icon">📧</span><span class="phase-item-text"><strong>Email login</strong> — no MetaMask required</span></div>
+        <div class="phase-item"><span class="phase-item-icon">🔄</span><span class="phase-item-text"><strong>Uniswap swap integration</strong> — on Arc DEX</span></div>
+        <div class="phase-item"><span class="phase-item-icon">📱</span><span class="phase-item-text"><strong>Mobile app</strong> — iOS + Android</span></div>
+      </div>
+
+      <!-- Phase 3 — Future -->
+      <div class="roadmap-phase">
+        <div class="phase-label future">🚀 Phase 3 — Q4 2026</div>
+        <div class="phase-title">Agentic Finance (Vyper)</div>
+        <div class="phase-item"><span class="phase-item-icon">🪪</span><span class="phase-item-text"><strong>ERC-8004 Agent Identity</strong> — onchain agent registration & reputation</span></div>
+        <div class="phase-item"><span class="phase-item-icon">💳</span><span class="phase-item-text"><strong>x402 Payment Flows</strong> — software-native agent payments</span></div>
+        <div class="phase-item"><span class="phase-item-icon">📋</span><span class="phase-item-text"><strong>Subscriptions</strong> — recurring USDC payments</span></div>
+        <div class="phase-item"><span class="phase-item-icon">💰</span><span class="phase-item-text"><strong>Spending limits</strong> — programmable agent budgets</span></div>
+        <div class="phase-item"><span class="phase-item-icon">🌐</span><span class="phase-item-text"><strong>Arc Mainnet launch</strong> — real USDC production</span></div>
+      </div>
+
+    </div>
+  </div>
 
   <!-- POOL SYSTEM -->
   <div class="pool-card" id="poolCard">
