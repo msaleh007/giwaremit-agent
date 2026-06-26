@@ -396,9 +396,9 @@
             <div class="wallet-dot"></div>
             <span class="wallet-addr" id="wAddr">—</span>
           </div>
-          <div style="display:flex;gap:12px;flex-wrap:wrap;">
+          <div style="display:flex;flex-direction:column;gap:4px;text-align:right;">
           <span class="wallet-balance" id="wBalance">— USDC</span>
-          <span style="font-family:'IBM Plex Mono',monospace;font-size:13px;color:var(--amber);font-weight:600;" id="wBalanceEURC">— EURC</span>
+          <span style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--amber);font-weight:600;" id="wBalanceEURC">— EURC</span>
         </div>
         </div>
 
@@ -697,7 +697,7 @@
 
   // ── Contracts ──
   const USDC_ADDRESS = '0x3600000000000000000000000000000000000000';
-  const EURC_ADDRESS = '0x3700000000000000000000000000000000000000';
+  const EURC_ADDRESS = '0x3700000000000000000000000000000000000000'; // Arc Testnet EURC
   const MEMO_CONTRACT_ADDRESS = '0x5294E9927c3306DcBaDb03fe70b92e01cCede505';
 
   const USDC_ABI = [
@@ -1083,8 +1083,11 @@
     try {
       const eurc = new ethers.Contract(EURC_ADDRESS, USDC_ABI, provider);
       const bal = await eurc.balanceOf(walletAddr);
-      document.getElementById('wBalanceEURC').textContent = parseFloat(ethers.formatUnits(bal, 6)).toFixed(2) + ' EURC';
-    } catch(e) { document.getElementById('wBalanceEURC').textContent = '— EURC'; }
+      const formatted = parseFloat(ethers.formatUnits(bal, 6)).toFixed(2);
+      document.getElementById('wBalanceEURC').textContent = formatted + ' EURC';
+    } catch(e) { 
+      document.getElementById('wBalanceEURC').textContent = '0.00 EURC'; 
+    }
   }
 
   // ── POOL SYSTEM ──
